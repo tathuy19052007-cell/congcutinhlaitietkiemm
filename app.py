@@ -12,7 +12,7 @@ st.set_page_config(
 # =========================
 # TIÊU ĐỀ
 # =========================
-st.title("💰APP TÍNH TIỀN GỬI TIẾT KIỆM TẠI NGÂN HÀNG THANH THUY")
+st.title("💰APP TÍNH TIỀN GỬI TIẾT KIỆM TẠI NGÂN HÀNG TA THI THANH THUY")
 st.write(
     "Tính tiền lãi theo **lãi đơn** hoặc **lãi kép**, "
     "với các hình thức lãnh lãi theo tháng, theo quý hoặc cuối kỳ."
