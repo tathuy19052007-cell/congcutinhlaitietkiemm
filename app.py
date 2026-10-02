@@ -8,14 +8,14 @@ from pathlib import Path
 # =========================================================
 
 st.set_page_config(
-    page_title="Tính lãi tiết kiệm",
+    page_title="Smart Saving - Tính tiền gửi tiết kiệm",
     page_icon="💰",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
 # =========================================================
-# 2. KHỞI TẠO SESSION STATE
+# 2. KHỞI TẠO DỮ LIỆU
 # =========================================================
 
 if "lich_su" not in st.session_state:
@@ -24,79 +24,48 @@ if "lich_su" not in st.session_state:
 if "ket_qua" not in st.session_state:
     st.session_state.ket_qua = None
 
+
 # =========================================================
-# 3. CSS - GIAO DIỆN
+# 3. CSS - CHỈ TRANG TRÍ, KHÔNG DÙNG HTML CARD
 # =========================================================
 
 st.markdown("""
 <style>
 
-/* Toàn trang */
 .block-container {
-    padding-top: 1.5rem;
+    padding-top: 2rem;
     padding-bottom: 3rem;
 }
 
-/* Card Dashboard */
-.dashboard-card {
-    background: white;
-    padding: 20px;
-    border-radius: 16px;
-    border: 1px solid #e5e7eb;
-    box-shadow: 0px 3px 12px rgba(0,0,0,0.06);
-    min-height: 145px;
-}
-
-.dashboard-title {
-    color: #6b7280;
-    font-size: 14px;
-    margin-bottom: 8px;
-}
-
-.dashboard-value {
-    color: #111827;
-    font-size: 25px;
-    font-weight: 700;
-}
-
-.dashboard-small {
-    color: #6b7280;
-    font-size: 13px;
-    margin-top: 8px;
-}
-
-/* Goal */
-.goal-card {
-    background: white;
-    padding: 22px;
-    border-radius: 16px;
-    border: 1px solid #e5e7eb;
-    box-shadow: 0px 3px 12px rgba(0,0,0,0.05);
-}
-
-/* Box cảnh báo */
-.warning-box {
-    background: #fff7ed;
-    padding: 18px;
-    border-radius: 14px;
-    border-left: 5px solid #f59e0b;
-}
-
-/* Box thông tin */
-.info-box {
-    background: #eff6ff;
-    padding: 18px;
-    border-radius: 14px;
-    border-left: 5px solid #3b82f6;
-}
-
 /* Tiêu đề */
-h1 {
+.main-title {
+    font-size: 38px;
     font-weight: 700;
 }
 
-h2, h3 {
-    font-weight: 650;
+.subtitle {
+    color: #666666;
+    font-size: 16px;
+}
+
+/* Làm đẹp metric */
+[data-testid="stMetric"] {
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    padding: 18px;
+    border-radius: 15px;
+    box-shadow: 0px 2px 8px rgba(0,0,0,0.05);
+}
+
+/* Nút */
+.stButton > button {
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+/* Thanh progress */
+.stProgress > div > div > div > div {
+    border-radius: 10px;
 }
 
 </style>
@@ -107,8 +76,8 @@ h2, h3 {
 # 4. HÀM ĐỊNH DẠNG TIỀN
 # =========================================================
 
-def tien_vnd(value):
-    return f"{value:,.0f} VNĐ"
+def tien_vnd(so_tien):
+    return f"{so_tien:,.0f} VNĐ"
 
 
 # =========================================================
@@ -147,8 +116,13 @@ with st.sidebar:
 
     st.divider()
 
-    st.caption("APP TÍNH TIỀN GỬI TIẾT KIỆM")
-    st.caption("Tạ Thị Thanh Thùy")
+    st.caption(
+        "APP TÍNH TIỀN GỬI TIẾT KIỆM"
+    )
+
+    st.caption(
+        "Tạ Thị Thanh Thùy"
+    )
 
 
 # =========================================================
@@ -165,10 +139,8 @@ tong_tien_lai = sum(
     for item in st.session_state.lich_su
 )
 
-tong_tai_san = tong_tien_gui + tong_tien_lai
-
-so_giao_dich = len(
-    st.session_state.lich_su
+tong_tai_san = (
+    tong_tien_gui + tong_tien_lai
 )
 
 
@@ -187,86 +159,43 @@ if menu == "🏠 Dashboard":
 
     st.divider()
 
-    # -----------------------------------------------------
-    # 7.1. 4 THẺ TỔNG QUAN
-    # -----------------------------------------------------
+    # =====================================================
+    # 4 THẺ TÀI CHÍNH
+    # =====================================================
+
+    st.subheader("📊 Tổng quan tài chính")
 
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
 
-        st.markdown(
-            f"""
-            <div class="dashboard-card">
-
-                <div class="dashboard-title">
-                    💰 Tổng tiền gửi
-                </div>
-
-                <div class="dashboard-value">
-                    {tien_vnd(tong_tien_gui)}
-                </div>
-
-                <div class="dashboard-small">
-                    Tổng vốn đã gửi
-                </div>
-
-            </div>
-            """,
-            unsafe_allow_html=True
+        st.metric(
+            label="💰 Tổng tiền gửi",
+            value=tien_vnd(tong_tien_gui),
+            help="Tổng số tiền gốc trong các khoản gửi"
         )
 
     with col2:
 
-        st.markdown(
-            f"""
-            <div class="dashboard-card">
-
-                <div class="dashboard-title">
-                    📈 Tổng tiền lãi
-                </div>
-
-                <div class="dashboard-value">
-                    {tien_vnd(tong_tien_lai)}
-                </div>
-
-                <div class="dashboard-small">
-                    Lãi dự kiến
-                </div>
-
-            </div>
-            """,
-            unsafe_allow_html=True
+        st.metric(
+            label="📈 Tổng tiền lãi",
+            value=tien_vnd(tong_tien_lai),
+            help="Tổng tiền lãi dự kiến"
         )
 
     with col3:
 
-        st.markdown(
-            f"""
-            <div class="dashboard-card">
-
-                <div class="dashboard-title">
-                    💎 Tổng tài sản
-                </div>
-
-                <div class="dashboard-value">
-                    {tien_vnd(tong_tai_san)}
-                </div>
-
-                <div class="dashboard-small">
-                    Gốc + lãi
-                </div>
-
-            </div>
-            """,
-            unsafe_allow_html=True
+        st.metric(
+            label="💎 Tổng tài sản",
+            value=tien_vnd(tong_tai_san),
+            help="Tổng tiền gốc cộng tiền lãi"
         )
 
     with col4:
 
         if tong_tien_gui > 0:
 
-            ty_le_lai = (
+            ty_le_sinh_loi = (
                 tong_tien_lai
                 / tong_tien_gui
                 * 100
@@ -274,34 +203,19 @@ if menu == "🏠 Dashboard":
 
         else:
 
-            ty_le_lai = 0
+            ty_le_sinh_loi = 0
 
-        st.markdown(
-            f"""
-            <div class="dashboard-card">
-
-                <div class="dashboard-title">
-                    📊 Tỷ lệ sinh lời
-                </div>
-
-                <div class="dashboard-value">
-                    {ty_le_lai:.2f}%
-                </div>
-
-                <div class="dashboard-small">
-                    Lãi / vốn
-                </div>
-
-            </div>
-            """,
-            unsafe_allow_html=True
+        st.metric(
+            label="📊 Tỷ lệ sinh lời",
+            value=f"{ty_le_sinh_loi:.2f}%",
+            help="Tổng lãi chia cho tổng tiền gửi"
         )
 
     st.write("")
 
-    # -----------------------------------------------------
-    # 7.2. MỤC TIÊU TÀI CHÍNH
-    # -----------------------------------------------------
+    # =====================================================
+    # MỤC TIÊU TÀI CHÍNH
+    # =====================================================
 
     st.subheader("🎯 Mục tiêu tài chính của bạn")
 
@@ -314,8 +228,7 @@ if menu == "🏠 Dashboard":
             min_value=0.0,
             value=100_000_000.0,
             step=5_000_000.0,
-            format="%.0f",
-            key="dashboard_goal"
+            format="%.0f"
         )
 
     with col2:
@@ -325,44 +238,49 @@ if menu == "🏠 Dashboard":
             min_value=0.0,
             value=float(tong_tai_san),
             step=1_000_000.0,
-            format="%.0f",
-            key="dashboard_current"
+            format="%.0f"
         )
 
     if muc_tieu > 0:
+
+        phan_tram = (
+            tien_hien_co
+            / muc_tieu
+            * 100
+        )
+
+        phan_tram = min(
+            max(phan_tram, 0),
+            100
+        )
 
         tien_con_thieu = max(
             muc_tieu - tien_hien_co,
             0
         )
 
-        phan_tram = min(
-            tien_hien_co / muc_tieu * 100,
-            100
-        )
+        col1, col2, col3 = st.columns(3)
 
-        st.markdown(
-            f"""
-            <div class="goal-card">
+        with col1:
 
-            <h3>🎯 Tiến độ mục tiêu</h3>
+            st.metric(
+                "🎯 Tiến độ",
+                f"{phan_tram:.1f}%"
+            )
 
-            <h1>{phan_tram:.1f}%</h1>
+        with col2:
 
-            <p>
-            Đã có:
-            <b>{tien_vnd(tien_hien_co)}</b>
-            </p>
+            st.metric(
+                "💰 Đã có",
+                tien_vnd(tien_hien_co)
+            )
 
-            <p>
-            Còn thiếu:
-            <b>{tien_vnd(tien_con_thieu)}</b>
-            </p>
+        with col3:
 
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+            st.metric(
+                "📌 Còn thiếu",
+                tien_vnd(tien_con_thieu)
+            )
 
         st.progress(
             int(phan_tram)
@@ -374,13 +292,22 @@ if menu == "🏠 Dashboard":
                 "🎉 Chúc mừng! Bạn đã đạt mục tiêu tài chính."
             )
 
+        else:
+
+            st.info(
+                f"🎯 Bạn đã hoàn thành {phan_tram:.1f}% "
+                f"mục tiêu."
+            )
+
     st.divider()
 
-    # -----------------------------------------------------
-    # 7.3. DỰ BÁO TÀI SẢN
-    # -----------------------------------------------------
+    # =====================================================
+    # DỰ BÁO TÀI SẢN
+    # =====================================================
 
-    st.subheader("🔮 Dự báo tài sản trong tương lai")
+    st.subheader(
+        "🔮 Dự báo tài sản trong tương lai"
+    )
 
     col1, col2, col3 = st.columns(3)
 
@@ -407,18 +334,22 @@ if menu == "🏠 Dashboard":
     with col3:
 
         so_nam_du_bao = st.number_input(
-            "📅 Số năm dự báo",
+            "📅 Thời gian dự báo",
             min_value=1,
             max_value=50,
             value=5,
             step=1
         )
 
-    lai_thang = (
-        lai_suat_du_bao / 100 / 12
+    # Tính dự báo
+
+    lai_suat_thang = (
+        lai_suat_du_bao
+        / 100
+        / 12
     )
 
-    so_thang = (
+    tong_so_thang = (
         so_nam_du_bao * 12
     )
 
@@ -428,11 +359,12 @@ if menu == "🏠 Dashboard":
 
     for thang in range(
         1,
-        so_thang + 1
+        tong_so_thang + 1
     ):
 
         so_du = (
-            so_du * (1 + lai_thang)
+            so_du
+            * (1 + lai_suat_thang)
             + tiet_kiem_thang
         )
 
@@ -442,7 +374,7 @@ if menu == "🏠 Dashboard":
 
             du_bao.append({
                 "Năm": nam,
-                "Tài sản dự kiến": so_du
+                "Tài sản": so_du
             })
 
     if du_bao:
@@ -456,32 +388,33 @@ if menu == "🏠 Dashboard":
             height=350
         )
 
-        gia_tri_cuoi = (
-            df_du_bao.iloc[-1]["Tài sản dự kiến"]
+        tai_san_cuoi = (
+            df_du_bao.iloc[-1]["Tài sản"]
         )
 
         st.success(
-            f"💰 Nếu duy trì kế hoạch hiện tại, "
-            f"sau {so_nam_du_bao} năm tài sản "
-            f"dự kiến khoảng "
-            f"**{tien_vnd(gia_tri_cuoi)}**."
+            f"💰 Sau {so_nam_du_bao} năm, "
+            f"tài sản dự kiến khoảng "
+            f"**{tien_vnd(tai_san_cuoi)}**."
         )
 
     st.divider()
 
-    # -----------------------------------------------------
-    # 7.4. KIỂM TRA MỤC TIÊU
-    # -----------------------------------------------------
+    # =====================================================
+    # MỤC TIÊU CÓ KHẢ THI KHÔNG
+    # =====================================================
 
-    st.subheader("🧠 Mục tiêu của bạn cần bao lâu?")
+    st.subheader(
+        "🧠 Mục tiêu của bạn cần bao lâu?"
+    )
 
     if muc_tieu > tien_hien_co:
 
-        if tiet_kiem_thang > 0:
+        tien_con_thieu = (
+            muc_tieu - tien_hien_co
+        )
 
-            tien_con_thieu = (
-                muc_tieu - tien_hien_co
-            )
+        if tiet_kiem_thang > 0:
 
             so_thang_can = (
                 tien_con_thieu
@@ -497,7 +430,7 @@ if menu == "🏠 Dashboard":
             )
 
             st.info(
-                f"📌 Nếu tiết kiệm "
+                f"📌 Với mức tiết kiệm "
                 f"**{tien_vnd(tiet_kiem_thang)}/tháng**, "
                 f"bạn cần khoảng "
                 f"**{nam_can} năm {thang_le} tháng** "
@@ -507,50 +440,61 @@ if menu == "🏠 Dashboard":
         else:
 
             st.warning(
-                "Bạn chưa nhập số tiền có thể tiết kiệm mỗi tháng."
+                "⚠️ Hãy nhập số tiền có thể tiết kiệm "
+                "mỗi tháng."
             )
 
     else:
 
         st.success(
-            "🎉 Bạn đã đạt hoặc vượt mục tiêu!"
+            "🎉 Bạn đã đạt mục tiêu tài chính!"
         )
 
     st.divider()
 
-    # -----------------------------------------------------
-    # 7.5. KHOẢN GỬI GẦN NHẤT
-    # -----------------------------------------------------
+    # =====================================================
+    # GIAO DỊCH GẦN ĐÂY
+    # =====================================================
 
-    st.subheader("📋 Khoản tiền gửi gần đây")
+    st.subheader(
+        "📋 Giao dịch gần đây"
+    )
 
     if st.session_state.lich_su:
 
-        gan_nhat = (
+        danh_sach = []
+
+        for item in reversed(
             st.session_state.lich_su[-5:]
-        )
+        ):
 
-        data = []
+            danh_sach.append({
 
-        for item in reversed(gan_nhat):
-
-            data.append({
                 "Ngày": item["ngay"],
-                "Tiền gửi": tien_vnd(
+
+                "Số tiền gửi": tien_vnd(
                     item["tien_gui"]
                 ),
-                "Kỳ hạn": f'{item["ky_han"]} tháng',
-                "Lãi suất": f'{item["lai_suat"]:.2f}%',
+
+                "Kỳ hạn": (
+                    f'{item["ky_han"]} tháng'
+                ),
+
+                "Lãi suất": (
+                    f'{item["lai_suat"]:.2f}%/năm'
+                ),
+
                 "Tiền lãi": tien_vnd(
                     item["tien_lai"]
                 ),
+
                 "Tổng nhận": tien_vnd(
                     item["tong_tien"]
                 )
             })
 
         st.dataframe(
-            pd.DataFrame(data),
+            pd.DataFrame(danh_sach),
             use_container_width=True,
             hide_index=True
         )
@@ -558,58 +502,52 @@ if menu == "🏠 Dashboard":
     else:
 
         st.info(
-            "📭 Bạn chưa có giao dịch nào. "
-            "Hãy sử dụng phần **🧮 Tính tiền gửi**."
+            "📭 Chưa có giao dịch nào. "
+            "Hãy sang mục **🧮 Tính tiền gửi** "
+            "để tạo giao dịch đầu tiên."
         )
 
-    # -----------------------------------------------------
-    # 7.6. GỢI Ý TÀI CHÍNH
-    # -----------------------------------------------------
+    st.divider()
 
-    st.subheader("💡 Gợi ý cho bạn")
+    # =====================================================
+    # GỢI Ý
+    # =====================================================
+
+    st.subheader(
+        "💡 Gợi ý cho bạn"
+    )
 
     if tong_tien_gui == 0:
 
         st.info(
-            "💡 Hãy bắt đầu bằng cách nhập một khoản tiền gửi "
-            "ở phần Tính tiền gửi."
+            "💡 Bạn chưa có khoản tiền gửi nào. "
+            "Hãy bắt đầu bằng cách sử dụng "
+            "máy tính tiền gửi."
         )
 
-    elif muc_tieu > tong_tai_san:
+    elif tien_con_thieu > 0:
 
-        st.markdown(
-            f"""
-            <div class="warning-box">
-
-            🎯 Bạn còn thiếu
-            <b>{tien_vnd(muc_tieu - tong_tai_san)}</b>
-            để đạt mục tiêu.
-
-            <br><br>
-
-            💡 Hãy duy trì khoản tiết kiệm hàng tháng
-            và theo dõi tiến độ trên Dashboard.
-
-            </div>
-            """,
-            unsafe_allow_html=True
+        st.warning(
+            f"🎯 Bạn còn thiếu "
+            f"**{tien_vnd(tien_con_thieu)}** "
+            f"để đạt mục tiêu."
         )
 
     else:
 
         st.success(
-            "✨ Tài chính của bạn đang đạt mục tiêu đã đặt!"
+            "✨ Bạn đã đạt mục tiêu tài chính hiện tại."
         )
 
 
 # =========================================================
-# 8. MÁY TÍNH TIỀN GỬI
+# 8. TÍNH TIỀN GỬI
 # =========================================================
 
 elif menu == "🧮 Tính tiền gửi":
 
     # =====================================================
-    # GIỮ NGUYÊN PHẦN HIỆN TẠI TRONG ẢNH
+    # LOGO
     # =====================================================
 
     logo_path = Path("logo.jpg.PNG")
@@ -620,6 +558,10 @@ elif menu == "🧮 Tính tiền gửi":
             str(logo_path),
             width=120
         )
+
+    # =====================================================
+    # TIÊU ĐỀ GIỮ NGUYÊN
+    # =====================================================
 
     st.title(
         "💰 APP TÍNH TIỀN GỬI TIẾT KIỆM "
@@ -638,7 +580,9 @@ elif menu == "🧮 Tính tiền gửi":
     # THÔNG TIN TIỀN GỬI
     # =====================================================
 
-    st.subheader("📌 Thông tin tiền gửi")
+    st.subheader(
+        "📌 Thông tin tiền gửi"
+    )
 
     col1, col2 = st.columns(2)
 
@@ -713,18 +657,6 @@ elif menu == "🧮 Tính tiền gửi":
 
             st.stop()
 
-        if lai_suat < 0:
-
-            st.error(
-                "⚠️ Lãi suất không được âm."
-            )
-
-            st.stop()
-
-        # -------------------------------------------------
-        # LÃI SUẤT
-        # -------------------------------------------------
-
         lai_suat_nam = (
             lai_suat / 100
         )
@@ -733,9 +665,9 @@ elif menu == "🧮 Tính tiền gửi":
             ky_han_thang / 12
         )
 
-        # -------------------------------------------------
+        # =================================================
         # LÃI ĐƠN
-        # -------------------------------------------------
+        # =================================================
 
         if loai_lai == "Lãi đơn":
 
@@ -772,18 +704,24 @@ elif menu == "🧮 Tính tiền gửi":
                 lai_ky = lai_thang
 
                 bang_chi_tiet.append({
-                    "Kỳ": f"Tháng {thang}",
-                    "Tiền gốc": tien_gui,
-                    "Tiền lãi": lai_ky,
-                    "Tổng tiền": (
+
+                    "Kỳ":
+                        f"Tháng {thang}",
+
+                    "Tiền gốc":
+                        tien_gui,
+
+                    "Tiền lãi":
+                        lai_ky,
+
+                    "Tổng tiền":
                         tien_gui
                         + lai_thang * thang
-                    )
                 })
 
-        # -------------------------------------------------
+        # =================================================
         # LÃI KÉP
-        # -------------------------------------------------
+        # =================================================
 
         else:
 
@@ -791,20 +729,16 @@ elif menu == "🧮 Tính tiền gửi":
                 lai_suat_nam / 12
             )
 
-            so_ky = ky_han_thang
-
             tong_tien = (
                 tien_gui
                 * (1 + lai_suat_thang)
-                ** so_ky
+                ** ky_han_thang
             )
 
             tong_tien_lai = (
                 tong_tien
                 - tien_gui
             )
-
-            lai_thang = None
 
             bang_chi_tiet = []
 
@@ -823,31 +757,33 @@ elif menu == "🧮 Tính tiền gửi":
                 so_du += lai_ky
 
                 bang_chi_tiet.append({
-                    "Kỳ": f"Tháng {thang}",
-                    "Tiền gốc": (
-                        so_du - lai_ky
-                    ),
-                    "Tiền lãi": lai_ky,
-                    "Tổng tiền": so_du
+
+                    "Kỳ":
+                        f"Tháng {thang}",
+
+                    "Tiền gốc":
+                        so_du - lai_ky,
+
+                    "Tiền lãi":
+                        lai_ky,
+
+                    "Tổng tiền":
+                        so_du
                 })
+
+            lai_thang = (
+                bang_chi_tiet[0]["Tiền lãi"]
+            )
 
             lai_quy = None
 
-        # -------------------------------------------------
+        # =================================================
         # LÃI ĐỊNH KỲ
-        # -------------------------------------------------
+        # =================================================
 
         if hinh_thuc == "Lãnh lãi hàng tháng":
 
-            if loai_lai == "Lãi đơn":
-
-                lai_dinh_ky = lai_thang
-
-            else:
-
-                lai_dinh_ky = (
-                    bang_chi_tiet[0]["Tiền lãi"]
-                )
+            lai_dinh_ky = lai_thang
 
         elif hinh_thuc == "Lãnh lãi hàng quý":
 
@@ -877,45 +813,70 @@ elif menu == "🧮 Tính tiền gửi":
 
             lai_dinh_ky = tong_tien_lai
 
-        # -------------------------------------------------
+        # =================================================
         # LƯU KẾT QUẢ
-        # -------------------------------------------------
+        # =================================================
 
         st.session_state.ket_qua = {
-            "tien_gui": tien_gui,
-            "ky_han": ky_han_thang,
-            "lai_suat": lai_suat,
-            "loai_lai": loai_lai,
-            "hinh_thuc": hinh_thuc,
-            "lai_dinh_ky": lai_dinh_ky,
-            "tien_lai": tong_tien_lai,
-            "tong_tien": tong_tien
+
+            "tien_gui":
+                tien_gui,
+
+            "ky_han":
+                ky_han_thang,
+
+            "lai_suat":
+                lai_suat,
+
+            "loai_lai":
+                loai_lai,
+
+            "hinh_thuc":
+                hinh_thuc,
+
+            "tien_lai":
+                tong_tien_lai,
+
+            "tong_tien":
+                tong_tien
         }
 
-        # -------------------------------------------------
+        # =================================================
         # LƯU LỊCH SỬ
-        # -------------------------------------------------
+        # =================================================
 
         st.session_state.lich_su.append({
 
-            "ngay": date.today().strftime(
-                "%d/%m/%Y"
-            ),
+            "ngay":
+                date.today().strftime(
+                    "%d/%m/%Y"
+                ),
 
-            "tien_gui": tien_gui,
+            "tien_gui":
+                tien_gui,
 
-            "ky_han": ky_han_thang,
+            "ky_han":
+                ky_han_thang,
 
-            "lai_suat": lai_suat,
+            "lai_suat":
+                lai_suat,
 
-            "loai_lai": loai_lai,
+            "loai_lai":
+                loai_lai,
 
-            "hinh_thuc": hinh_thuc,
+            "hinh_thuc":
+                hinh_thuc,
 
-            "tien_lai": tong_tien_lai,
+            "tien_lai":
+                tong_tien_lai,
 
-            "tong_tien": tong_tien
+            "tong_tien":
+                tong_tien
         })
+
+        # =================================================
+        # THÔNG BÁO
+        # =================================================
 
         st.success(
             "✅ Tính toán thành công!"
@@ -925,7 +886,9 @@ elif menu == "🧮 Tính tiền gửi":
         # KẾT QUẢ
         # =================================================
 
-        st.subheader("📊 KẾT QUẢ")
+        st.subheader(
+            "📊 KẾT QUẢ"
+        )
 
         col1, col2, col3 = st.columns(3)
 
@@ -965,7 +928,7 @@ elif menu == "🧮 Tính tiền gửi":
 
         st.info(
             f"📅 Ngày bắt đầu: "
-            f"**{date.today().strftime('%d/%m/%Y')}**  \n"
+            f"**{date.today().strftime('%d/%m/%Y')}**\n\n"
             f"🔔 Ngày dự kiến đáo hạn: "
             f"**{ngay_dao_han.strftime('%d/%m/%Y')}**"
         )
@@ -1052,20 +1015,20 @@ elif menu == "🧮 Tính tiền gửi":
             "📈 Biểu đồ tăng trưởng"
         )
 
-        df_bieu_do = pd.DataFrame(
+        df_chart = pd.DataFrame(
             bang_chi_tiet
         )
 
-        df_bieu_do = df_bieu_do[
+        df_chart = df_chart[
             ["Kỳ", "Tổng tiền"]
         ]
 
-        df_bieu_do = df_bieu_do.set_index(
+        df_chart = df_chart.set_index(
             "Kỳ"
         )
 
         st.line_chart(
-            df_bieu_do
+            df_chart
         )
 
         # =================================================
@@ -1087,9 +1050,15 @@ elif menu == "🧮 Tính tiền gửi":
                 )
 
                 st.write(
-                    "Trong đó: P là tiền gốc, "
-                    "r là lãi suất năm, "
-                    "t là thời gian gửi tính theo năm."
+                    "P: tiền gốc"
+                )
+
+                st.write(
+                    "r: lãi suất năm"
+                )
+
+                st.write(
+                    "t: thời gian gửi tính theo năm"
                 )
 
             else:
@@ -1103,9 +1072,15 @@ elif menu == "🧮 Tính tiền gửi":
                 )
 
                 st.write(
-                    "Trong đó: P là tiền gốc, "
-                    "r là lãi suất mỗi kỳ, "
-                    "n là số kỳ nhập lãi."
+                    "P: tiền gốc"
+                )
+
+                st.write(
+                    "r: lãi suất mỗi kỳ"
+                )
+
+                st.write(
+                    "n: số kỳ nhập lãi"
                 )
 
         st.info(
@@ -1126,7 +1101,7 @@ elif menu == "🎯 Mục tiêu tiết kiệm":
     )
 
     st.write(
-        "Tạo kế hoạch để đạt được mục tiêu tài chính."
+        "Lập kế hoạch để đạt được mục tiêu tài chính."
     )
 
     st.divider()
@@ -1154,7 +1129,7 @@ elif menu == "🎯 Mục tiêu tiết kiệm":
         )
 
     tiet_kiem = st.number_input(
-        "💵 Số tiền có thể tiết kiệm mỗi tháng",
+        "💵 Có thể tiết kiệm mỗi tháng",
         min_value=0.0,
         value=3_000_000.0,
         step=500_000.0,
@@ -1163,41 +1138,40 @@ elif menu == "🎯 Mục tiêu tiết kiệm":
 
     if muc_tieu > 0:
 
-        phan_tram = min(
-            hien_co / muc_tieu * 100,
-            100
-        )
-
-        con_thieu = max(
+        tien_thieu = max(
             muc_tieu - hien_co,
             0
         )
 
+        tien_do = min(
+            hien_co / muc_tieu,
+            1
+        )
+
         st.metric(
             "📊 Tiến độ",
-            f"{phan_tram:.1f}%"
+            f"{tien_do * 100:.1f}%"
         )
 
         st.progress(
-            int(phan_tram)
+            int(tien_do * 100)
         )
 
         st.write(
             f"💰 Còn thiếu: "
-            f"**{tien_vnd(con_thieu)}**"
+            f"**{tien_vnd(tien_thieu)}**"
         )
 
         if tiet_kiem > 0:
 
             so_thang = (
-                con_thieu
+                tien_thieu
                 / tiet_kiem
             )
 
             st.success(
-                f"⏳ Cần khoảng "
-                f"**{so_thang:.1f} tháng** "
-                f"nếu tiết kiệm đều."
+                f"⏳ Dự kiến cần "
+                f"**{so_thang:.1f} tháng**."
             )
 
 
@@ -1212,7 +1186,7 @@ elif menu == "🛒 Giá trị món đồ":
     )
 
     st.write(
-        "Tính xem một món đồ tương đương bao nhiêu tháng tiết kiệm."
+        "Biến giá tiền thành số tháng tiết kiệm."
     )
 
     st.divider()
@@ -1226,7 +1200,7 @@ elif menu == "🛒 Giá trị món đồ":
     )
 
     tiet_kiem_thang = st.number_input(
-        "💵 Số tiền tiết kiệm mỗi tháng",
+        "💵 Tiền tiết kiệm mỗi tháng",
         min_value=0.0,
         value=3_000_000.0,
         step=500_000.0,
@@ -1246,7 +1220,7 @@ elif menu == "🛒 Giá trị món đồ":
         )
 
         st.info(
-            f"💡 Món đồ trị giá "
+            f"💡 Món đồ "
             f"**{tien_vnd(gia_mon_do)}** "
             f"tương đương khoảng "
             f"**{so_thang:.1f} tháng tiết kiệm**."
@@ -1264,8 +1238,8 @@ elif menu == "🛡️ Quỹ khẩn cấp":
     )
 
     st.write(
-        "Xem số tiền hiện tại có thể duy trì cuộc sống "
-        "trong bao nhiêu tháng nếu không có thu nhập."
+        "Ước tính số tháng bạn có thể duy trì "
+        "chi phí sinh hoạt nếu không có thu nhập."
     )
 
     st.divider()
@@ -1285,7 +1259,7 @@ elif menu == "🛡️ Quỹ khẩn cấp":
     with col2:
 
         chi_tieu = st.number_input(
-            "💸 Chi phí mỗi tháng",
+            "💸 Chi phí sinh hoạt/tháng",
             min_value=0.0,
             value=7_000_000.0,
             step=500_000.0,
@@ -1336,7 +1310,7 @@ elif menu == "🛡️ Quỹ khẩn cấp":
         if so_thang < 3:
 
             st.warning(
-                "⚠️ Quỹ hiện tại dưới 3 tháng chi phí."
+                "⚠️ Quỹ hiện tại dưới 3 tháng."
             )
 
         elif so_thang < 6:
@@ -1363,7 +1337,7 @@ elif menu == "📋 Lịch sử giao dịch":
     )
 
     st.write(
-        "Theo dõi những khoản tiền gửi bạn đã tính."
+        "Theo dõi những khoản tiền gửi đã tính."
     )
 
     st.divider()
@@ -1376,42 +1350,42 @@ elif menu == "📋 Lịch sử giao dịch":
 
     else:
 
-        data = []
+        danh_sach = []
 
         for item in st.session_state.lich_su:
 
-            data.append({
+            danh_sach.append({
 
-                "Ngày": item["ngay"],
+                "Ngày":
+                    item["ngay"],
 
-                "Tiền gửi": tien_vnd(
-                    item["tien_gui"]
-                ),
+                "Tiền gửi":
+                    tien_vnd(
+                        item["tien_gui"]
+                    ),
 
-                "Kỳ hạn": (
-                    f'{item["ky_han"]} tháng'
-                ),
+                "Kỳ hạn":
+                    f'{item["ky_han"]} tháng',
 
-                "Lãi suất": (
-                    f'{item["lai_suat"]:.2f}%'
-                ),
+                "Lãi suất":
+                    f'{item["lai_suat"]:.2f}%',
 
-                "Phương pháp": item[
-                    "loai_lai"
-                ],
+                "Phương pháp":
+                    item["loai_lai"],
 
-                "Tiền lãi": tien_vnd(
-                    item["tien_lai"]
-                ),
+                "Tiền lãi":
+                    tien_vnd(
+                        item["tien_lai"]
+                    ),
 
-                "Tổng nhận": tien_vnd(
-                    item["tong_tien"]
-                )
-
+                "Tổng nhận":
+                    tien_vnd(
+                        item["tong_tien"]
+                    )
             })
 
         df_history = pd.DataFrame(
-            data
+            danh_sach
         )
 
         st.dataframe(
@@ -1451,9 +1425,9 @@ elif menu == "📋 Lịch sử giao dịch":
                 )
             )
 
-        # -------------------------------------------------
-        # DOWNLOAD CSV
-        # -------------------------------------------------
+        # =================================================
+        # TẢI FILE CSV
+        # =================================================
 
         csv = df_history.to_csv(
             index=False
@@ -1469,6 +1443,10 @@ elif menu == "📋 Lịch sử giao dịch":
 
         st.divider()
 
+        # =================================================
+        # XÓA
+        # =================================================
+
         if st.button(
             "🗑️ Xóa toàn bộ lịch sử"
         ):
@@ -1476,7 +1454,7 @@ elif menu == "📋 Lịch sử giao dịch":
             st.session_state.lich_su = []
 
             st.success(
-                "Đã xóa toàn bộ lịch sử."
+                "Đã xóa toàn bộ lịch sử giao dịch."
             )
 
             st.rerun()
